@@ -1,0 +1,32 @@
+# intellij
+/src/intellij*/*.iml
+/src/intellij*/*.ipr
+/src/intellij*/*.iws
+**/.cache
+/.idea
+/.settings
+
+# vscode
+/.vscode
+
+# metals
+.metals
+.bloop
+project/**/metals.sbt
+
+.bsp
+
+# target directory for build
+/build/
+
+# sbt's target directories
+/target/
+/project/**/target/
+/test/macro-annot/target/
+/test/files/target/
+/test/target/
+/build-sbt/
+local.sbt
+jitwatch.out
+
+application.conf
