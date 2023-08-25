@@ -25,7 +25,11 @@ object DailyMeows extends IOApp.Simple:
     dbPassword: String
   ) derives ConfigReader
         
-  val config: Config = ConfigSource.default.loadOrThrow[Config]
+  val config: Config = ConfigSource
+    .resources("local.conf")
+    .optional
+    .withFallback(ConfigSource.resources("application.conf"))
+    .loadOrThrow[Config]
 
   val sessionResource: Resource[IO, Session[IO]] = Session.single[IO](
     host = config.dbHost,
