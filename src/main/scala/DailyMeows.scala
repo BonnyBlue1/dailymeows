@@ -52,17 +52,21 @@ object DailyMeows extends IOApp.Simple:
   private def checkAndSendDaily(botApi: BotApi[IO]): IO[Unit] =
     sessionResource.use { session =>
       for
+        _        <- IO.println("Getting all users due for a new fact...")
         users    <- session.execute(Repo.getUsersDueForAFact)
+        _        <- IO.println(s"Got ${users.length} users due for a new fact. Sending out the facts...")
         commands <- users.flatTraverse(user => sendFact(ChatIntId(user.chatId)))
         _        <- commands.traverse(botApi.execute)
+        _        <- IO.println("Finished sending out facts")
       yield ()
     }
 
   private def checkAndSendDailyIfWorkingHours(botApi: BotApi[IO]): IO[Unit] = for
+    _           <- IO.println("Checking if this is a good time to send out facts")
     now         <- Clock[IO].realTimeInstant
     localTimeUtc = now.atOffset(ZoneOffset.UTC).toLocalTime
     _           <- checkAndSendDaily(botApi)
-      .whenA(localTimeUtc.isAfter(LocalTime.of(14, 0)) && localTimeUtc.isBefore(LocalTime.of(20, 0)))
+      .whenA(localTimeUtc.isAfter(LocalTime.of(10, 0)) && localTimeUtc.isBefore(LocalTime.of(20, 0)))
   yield ()
 
   val run: IO[Unit] =
@@ -72,7 +76,10 @@ object DailyMeows extends IOApp.Simple:
         val botApi: BotApi[IO] = BotApi[IO](httpClient, s"https://api.telegram.org/bot${config.telegramToken}")
         val bot = new DailyMeowsLongPollBot(botApi)
         for
-          _ <- checkAndSendDailyIfWorkingHours(botApi).flatMap(_ => IO.sleep(1.hour)).foreverM
-          _ <- bot.start()
+          _        <- IO.println("Starting DailyMeows")
+          _        <- checkAndSendDailyIfWorkingHours(botApi).flatMap(_ => IO.sleep(1.hour)).foreverM.start
+          botFiber <- bot.start().start
+          _        <- IO.println("Started successfully")
+          _        <- botFiber.join
         yield ()
       }

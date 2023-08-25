@@ -1,5 +1,5 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
-
+ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("releases")
 ThisBuild / scalaVersion := "3.3.0"
 
 lazy val root = (project in file("."))
@@ -15,3 +15,4 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.4"
     )
   )
+  .enablePlugins(JavaAppPackaging)
