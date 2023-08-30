@@ -28,11 +28,11 @@ class DailyMeowsLongPollBot(botApi: BotApi[IO]) extends LongPollBot[IO](botApi):
     result2 <- sendFact(chatId)
   yield List(result1) ++ result2
 
-  def processMessage(chatId: ChatIntId, msgText: String): IO[List[Method[Message]]] = msgText match
-    case "/start"  => processStart(chatId)
-    case "/meow"   => IO.pure(List(sendMessage(chatId, "MEOW")))
-    case "/squeak" => IO.pure(List(sendMessage(chatId, "squeak........")))
-    case other     => IO.pure(List(sendMessage(chatId, s"I don't meow $other")))
+  def processMessage(chatId: ChatIntId, msgText: String): IO[List[Method[Message]]] = msgText.toLowerCase match
+    case "/start"             => processStart(chatId)
+    case "meow" | "/meow"     => IO.pure(List(sendMessage(chatId, "Meow!"))) 
+    case "squeak" | "/squeak" => IO.pure(List(sendMessage(chatId, "Squeak!")))
+    case other                => IO.pure(List(sendMessage(chatId, "Meow meow!")))
 
   override def onMessage(msg: Message): IO[Unit] = msg.text match
     case Some(text) =>
